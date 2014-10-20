@@ -1,6 +1,8 @@
 file-gistem
 ===========
 
+use node v0.11 harmony generator, powered by koa
+
 
 config.coffee
 
