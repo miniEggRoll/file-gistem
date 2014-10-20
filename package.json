@@ -1,0 +1,20 @@
+{
+  "name": "file-gistem",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "./node_modules/.bin/coffee --nodejs --harmony src/index.coffee"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "coffee-script": "git://github.com/xixixao/coffee-script",
+    "gistem": "git://github.com/mrsquid0126/gistem",
+    "koa": "^0.13.0",
+    "koa-trie-router": "^1.0.8",
+    "q": "^1.0.1",
+    "underscore": "^1.7.0"
+  }
+}
