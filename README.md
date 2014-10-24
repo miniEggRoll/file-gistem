@@ -10,6 +10,8 @@ config.coffee
 exports.acc = 
   user: 'gist account'
   password: 'password'
+
+exports.port = your port
 ```
 
 start

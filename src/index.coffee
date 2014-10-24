@@ -1,11 +1,13 @@
+_       = require 'underscore'
 Q       = require 'q'
 koa     = require 'koa'
 https   = require 'https'
-_       = require 'underscore'
 gistem  = require 'gistem'
-config  = require "#{__dirname}/../config"
 
-{acc} = config
+config  = require "#{__dirname}/../config"
+{port, acc} = config
+port ?= 20010
+
 
 gist = new gistem acc
 gist._cache = {}
@@ -27,7 +29,7 @@ app.route '/gist/:description/:filename'
         @body = yield getFile(@params, g)
         yield next
 
-app.listen 20010, -> console.log 'listen on 20010'
+app.listen port, -> console.log "listening on #{port}"
 
 getGist = (gist, description)->
     Q.Promise (resolve)->
