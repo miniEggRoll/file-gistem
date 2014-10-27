@@ -16,33 +16,22 @@ app.use require('koa-trie-router') app
 
 app.route '/gist/:description/:filename'
     .get (next)-->
-        params = _.defaults params = @params, {
-            filename: 'index.html'
-        }
-
-        {filename, description} = params
-        ext = filename.split('.').pop()
-
-        switch ext
-            when 'html'
-                @type = 'text/html'
-            when 'js'
-                @type = 'text/javascript'
-            when 'css'
-                @type = 'text/css'
-            when 'coffee'
-                @type = 'text/coffeescript'
+        {filename, description} = @params
+        filename ||= 'index.html'
+        description ||= 'shared'
 
         g = yield getGist(gist, description)
-        if g then @body = yield getFile(params, g) else @throw 404, "can't find file #{description}/#{filename}"
+        if g and file = g.files[filename]
+            @type = file.type
+            @body = yield getFile({description, filename}, g)
+        else @throw 404, "can't find file #{description}/#{filename}"
+
         yield next
 
 app.route '/gist/:description'
     .get (next)-->
-        params = _.defaults params = @params, {
-            description: 'shared'
-        }
-        {description} = params
+        {description} = @params
+        description ||= 'shared'
         @redirect "/gist/#{description}/index.html"
 
 app.route '/gist'
