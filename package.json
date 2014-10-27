@@ -11,9 +11,12 @@
   "license": "ISC",
   "dependencies": {
     "coffee-script": "git://github.com/xixixao/coffee-script",
+    "debug": "^2.1.0",
     "gistem": "git://github.com/mrsquid0126/gistem",
     "koa": "^0.13.0",
+    "koa-cash": "^1.0.1",
     "koa-trie-router": "^1.0.8",
+    "lru-cache": "^2.5.0",
     "q": "^1.0.1",
     "underscore": "^1.7.0"
   }
