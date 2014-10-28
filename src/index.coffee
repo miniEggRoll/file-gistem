@@ -1,69 +1,22 @@
-_       = require 'underscore'
-Q       = require 'q'
-debug   = require('debug')('file:index')
-koa     = require 'koa'
-https   = require 'https'
-gistem  = require 'gistem'
+c           = require 'lru-cache'
+formatDate  = require 'dateformat'
+path        = require 'path'
+debug       = require('debug')('file:index')
+koa         = require 'koa'
+router      = require path.join(__dirname, 'router')
+{port}      = require "#{__dirname}/../config"
 
-config  = require "#{__dirname}/../config"
-{port, acc} = config
-port ?= 20010
-
-gist = new gistem acc
+_cache = c()
 
 app = koa()
-app.use require('koa-trie-router') app
 
-app.route '/gist/:description/:filename'
-    .get (next)-->
-        {filename, description} = @params
-        filename ||= 'index.html'
-        description ||= 'shared'
-
-        g = yield getGist(gist, description)
-        if g and file = g.files[filename]
-            @type = file.type
-            @body = yield getFile({description, filename}, g)
-        else @throw 404, "can't find file #{description}/#{filename}"
-
+app.use (next)-->
+    if !@headers.refreshgist? and  cache = _cache.get @path 
+        {buff, type} = cache
+        @body = buff
+        @type = type
+    else 
         yield next
 
-app.route '/gist/:description'
-    .get (next)-->
-        {description} = @params
-        description ||= 'shared'
-        @redirect "/gist/#{description}/index.html"
-
-app.route '/gist'
-    .get (next)-->
-        @redirect "/gist/shared/index.html"
-
-app.route '/'
-    .get (next)-->
-        @redirect "/gist"
-
+router app, _cache
 app.listen port, -> console.log "listening on #{port}"
-
-getGist = (gist, description)->
-    Q.Promise (resolve)->
-        gist.init()
-        .then (token)->
-            gist.list token
-        .then (gists)->
-            g = _.findWhere gists, {description}
-            resolve g
-
-getFile = ({filename, description}, {files})->
-    Q.Promise (resolve)->
-        {raw_url} = files[filename]
-        reqOpt =
-            hostname: 'gist.githubusercontent.com'
-            port: 443
-            path: raw_url.split('gist.githubusercontent.com')[1]
-            method: 'GET'
-            auth: "#{gist.token}:x-oauth-basic"
-            headers:
-                'User-Agent': acc.user
-        req = https.request reqOpt, (res)->
-            resolve res
-        do req.end
