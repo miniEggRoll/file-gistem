@@ -25,34 +25,25 @@ loadFile = (description, filename, _cache)->
             @body = res.pipe collector
         else @throw 404, "can't find file #{description}/#{filename}"
 
+defaultParams = (params)->
+    {filename, description} = params
+    filename ||= 'index.html'
+    description ||= 'shared'
+    {filename, description}
+
 module.exports = (app, _cache)->
-    app.use require('koa-trie-router') app
-    app.route '/gist/:description/:filename'
-        .get (next)-->
-            {filename, description} = @params
-            filename ||= 'index.html'
-            description ||= 'shared'
-            yield loadFile(description, filename, _cache).call @
-            yield next
+    router = require('koa-trie-router') app
+    app.route [
+        '/gist/:description/:filename'
+        '/gist/:description/'
+        '/gist/:description'
+        '/gist/'
+        '/gist'
+        '/'
+    ]
+    .get (next)-->
+        {description, filename} = defaultParams @params
+        yield loadFile(description, filename, _cache).call @
+        yield next
 
-    app.route '/gist/:description'
-        .get (next)-->
-            {description} = @params
-            description ||= 'shared'
-            filename = 'index.html'
-            yield loadFile(description, filename, _cache).call @
-            yield next
-
-    app.route '/gist'
-        .get (next)-->
-            description = 'shared'
-            filename = 'index.html'
-            yield loadFile(description, filename, _cache).call @
-            yield next
-
-    app.route '/'
-        .get (next)-->
-            description = 'shared'
-            filename = 'index.html'
-            yield loadFile(description, filename, _cache).call @
-            yield next
+    router

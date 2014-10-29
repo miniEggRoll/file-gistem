@@ -1,14 +1,19 @@
+_           = require 'underscore'
 c           = require 'lru-cache'
 formatDate  = require 'dateformat'
+url         = require 'url'
 path        = require 'path'
 debug       = require('debug')('file:index')
 koa         = require 'koa'
-router      = require path.join(__dirname, 'router')
+route       = require path.join(__dirname, 'router')
 {port}      = require "#{__dirname}/../config"
 
-_cache = c()
-
 app = koa()
+_cache = c {
+    maxAge: 24*60*60*1000
+}
+
+router = route app, _cache
 
 app.use (next)-->
     if !@headers.refreshgist? and  cache = _cache.get @path 
@@ -18,5 +23,5 @@ app.use (next)-->
     else 
         yield next
 
-router app, _cache
+app.use router
 app.listen port, -> console.log "listening on #{port}"
