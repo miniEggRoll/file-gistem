@@ -10,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "coffee-script": "git://github.com/xixixao/coffee-script",
+    "co": "^3.1.0",
+    "coffee-script": "git://github.com/jashkenas/coffee-script",
     "dateformat": "^1.0.8",
     "debug": "^2.1.0",
     "gistem": "git://github.com/mrsquid0126/gistem",

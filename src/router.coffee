@@ -2,6 +2,7 @@ stream              = require 'stream'
 debug               = require('debug')('file:router')
 path                = require 'path'
 {getGist, getFile}  = require path.join(__dirname, 'getGist')
+googleAuth          = require path.join(__dirname, 'googleAuth')
 
 class collect extends stream.Transform
     constructor: (@cache, @path, @type)->
@@ -16,7 +17,7 @@ class collect extends stream.Transform
         do cb
 
 loadFile = (description, filename, _cache)->
-    -->
+    ->
         g = yield getGist(description)
         if g and file = g.files[filename]
             @type = file.type
@@ -41,9 +42,12 @@ module.exports = (app, _cache)->
         '/gist'
         '/'
     ]
-    .get (next)-->
+    .get (next)->
         {description, filename} = defaultParams @params
         yield loadFile(description, filename, _cache).call @
         yield next
+
+    app.route '/auth/:provider'
+    .get googleAuth
 
     router
