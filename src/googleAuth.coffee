@@ -26,8 +26,7 @@ module.exports = (next)->
     try
         {hd} = yield getData reqOpt
     catch e
-        {code, message} = e.error
-        @throw code, message
+        @throw 401, e
     
     if hd is 'eztable.com' then @body = {hd} else @throw 401, 'NOT EZTABLEr'
     yield next
