@@ -1,13 +1,6 @@
 path        = require 'path'
-fs          = require 'fs'
-co          = require 'co'
 https       = require 'https'
 debug       = require('debug')('file:googleAuth')
-koa         = require 'koa'
-
-sslOptions = 
-    key: fs.readFileSync path.join(__dirname, '..', 'key.pem')
-    cert: fs.readFileSync path.join(__dirname, '..', 'cert.pem')
 
 getData = (reqOpt)->
     (done)->
