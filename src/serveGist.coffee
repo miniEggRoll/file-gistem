@@ -25,9 +25,10 @@ module.exports = ->
             if !etag[@path]? then etag[@path] = Date.now()
             reload = @headers.refreshgist?
             if cache = _cache.get @path and !reload
-                {buff, type} = cache
+                {buff, type, raw_url} = cache
                 @body = buff
                 @type = type
+                @set 'gist_raw_url', raw_url
             else
                 yield next
                 etag[@path] = Date.now()

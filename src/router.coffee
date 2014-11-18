@@ -5,7 +5,7 @@ path                = require 'path'
 googleAuth          = require path.join(__dirname, 'googleAuth')
 
 class collect extends stream.Transform
-    constructor: (@cache, @path, @type)->
+    constructor: (@cache, @path, @type, @raw_url)->
         super
         @buff = new Buffer(0)
     _transform: (chunk, dummy, cb)->
@@ -13,18 +13,17 @@ class collect extends stream.Transform
         @push chunk
         do cb
     _flush: (cb)->
-        @cache.set @path, {@buff, @type}
+        @cache.set @path, {@buff, @type, @raw_url}
         do cb
 
 loadFile = (description, filename, _cache)->
     ->
         g = yield getGist(description)
         if g and file = g.files[filename]
-            @set 'gist_raw_url', file.raw_url
-            @type = file.type
-            collector = new collect(_cache, @path, @type)
+            {@type, @raw_url} = file
             res = yield getFile({description, filename}, g)
-            @body = res.pipe collector
+            @body = res.pipe new collect(_cache, @path, @type, @raw_url)
+            @set 'gist_raw_url', @raw_url
         else @throw 404, "can't find file #{description}/#{filename}"
 
 defaultParams = (params)->
