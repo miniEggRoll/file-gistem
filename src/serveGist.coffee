@@ -24,7 +24,7 @@ module.exports = ->
         unless @path is '/auth/google'
             if !etag[@path]? then etag[@path] = Date.now()
             reload = @headers.refreshgist?
-            if cache = _cache.get @path and !reload
+            if !reload and cache = _cache.get @path
                 {buff, type, raw_url} = cache
                 @body = buff
                 @type = type

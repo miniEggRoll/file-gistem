@@ -18,7 +18,8 @@ getData = (reqOpt)->
         do emailReq.end
 
 signFirebaseToken = ({hd, email})->
-    firebase_token = tokenGenerator.createToken {email, hd}
+    uid = email
+    firebase_token = tokenGenerator.createToken {uid, hd}
     @body = {firebase_token}
 
 module.exports = (next)->
