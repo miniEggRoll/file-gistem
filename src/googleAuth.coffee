@@ -1,6 +1,10 @@
-path        = require 'path'
-https       = require 'https'
-debug       = require('debug')('file:googleAuth')
+path            = require 'path'
+https           = require 'https'
+tokenGen        = require 'firebase-token-generator'
+debug           = require('debug')('file:googleAuth')
+{secret, port}  = require "#{__dirname}/../config"
+
+tokenGenerator = new tokenGen secret
 
 getData = (reqOpt)->
     (done)->
@@ -13,6 +17,9 @@ getData = (reqOpt)->
                 else done new Error(result) 
         do emailReq.end
 
+signFirebaseToken = ({hd, email})->
+    firebase_token = tokenGenerator.createToken {email, hd}
+    @body = {firebase_token}
 
 module.exports = (next)->
     token = @get 'googleAccessToken'
@@ -24,9 +31,9 @@ module.exports = (next)->
             Authorization: "Bearer #{token}"
 
     try
-        {hd} = yield getData reqOpt
+        {hd, email} = yield getData reqOpt
     catch e
         @throw 401, e
     
-    if hd is 'eztable.com' then @body = {hd} else @throw 401, 'NOT EZTABLEr'
+    if hd is 'eztable.com' then signFirebaseToken.call @, email else @throw 401, 'NOT EZTABLEr'
     yield next
