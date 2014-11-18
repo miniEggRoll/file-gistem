@@ -23,7 +23,7 @@ module.exports = ->
     app.use (next)->
         unless @path is '/auth/google'
             if !etag[@path]? then etag[@path] = Date.now()
-            reload = !@headers.refreshgist?
+            reload = @headers.refreshgist?
             if cache = _cache.get @path and !reload
                 {buff, type} = cache
                 @body = buff

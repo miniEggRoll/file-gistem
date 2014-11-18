@@ -20,6 +20,7 @@ loadFile = (description, filename, _cache)->
     ->
         g = yield getGist(description)
         if g and file = g.files[filename]
+            @set 'gist_raw_url', file.raw_url
             @type = file.type
             collector = new collect(_cache, @path, @type)
             res = yield getFile({description, filename}, g)
