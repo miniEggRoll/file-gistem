@@ -32,9 +32,11 @@ module.exports = (next)->
             Authorization: "Bearer #{token}"
 
     try
-        {hd, email} = yield getData reqOpt
+        data = yield getData reqOpt
+        {hd, email} = data
+        console.log data
     catch e
         @throw 401, e
     
-    if hd is 'eztable.com' then signFirebaseToken.call @, email else @throw 401, 'NOT EZTABLEr'
+    if hd is 'eztable.com' then signFirebaseToken.call @, {hd, email} else @throw 401, 'NOT EZTABLEr'
     yield next
