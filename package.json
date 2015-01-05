@@ -18,6 +18,8 @@
     "gistem": "git://github.com/mrsquid0126/gistem",
     "koa": "^0.13.0",
     "koa-cash": "^1.0.1",
+    "koa-conditional-get": "^1.0.2",
+    "koa-etag": "^2.0.0",
     "koa-trie-router": "^1.0.8",
     "lru-cache": "^2.5.0",
     "moment": "^2.8.3",

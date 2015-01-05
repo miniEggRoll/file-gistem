@@ -2,7 +2,7 @@ path            = require 'path'
 https           = require 'https'
 tokenGen        = require 'firebase-token-generator'
 debug           = require('debug')('file:googleAuth')
-{secret, port}  = require "#{__dirname}/../config"
+{secret, port}  = process.env
 
 tokenGenerator = new tokenGen secret
 

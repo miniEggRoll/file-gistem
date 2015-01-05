@@ -4,9 +4,10 @@ debug   = require('debug')('file:getGist')
 path    = require 'path'
 gistem  = require 'gistem'
 Q       = require 'q'
-{acc}   = require path.join(__dirname, '..', 'config')
 
-gist = new gistem acc
+{user, password} = process.env
+
+gist = new gistem {user, password}
 
 module.exports.getGist = (description)->
     Q.Promise (resolve)->
@@ -27,7 +28,7 @@ module.exports.getFile = ({filename, description}, {files})->
             method: 'GET'
             auth: "#{gist.token}:x-oauth-basic"
             headers:
-                'User-Agent': acc.user
+                'User-Agent': user
         req = https.request reqOpt, (res)->
             resolve res
         do req.end

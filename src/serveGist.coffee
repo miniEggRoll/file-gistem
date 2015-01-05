@@ -1,44 +1,40 @@
 http        = require 'http'
-c           = require 'lru-cache'
-formatDate  = require 'dateformat'
-url         = require 'url'
 path        = require 'path'
-moment      = require 'moment'
 debug       = require('debug')('file:index')
 koa         = require 'koa'
+cond        = require 'koa-conditional-get'
+etag        = require 'koa-etag'
+c           = require 'lru-cache'
 route       = require path.join(__dirname, 'router')
-{port}      = require "#{__dirname}/../config"
+
+{port, maxSeconds} = process.env
+
+maxSeconds = 60*60*24
+_cache = c {
+    maxAge: maxSeconds*1000
+}
 
 module.exports = ->
     app = koa()
 
-    _cache = c {
-        maxAge: 24*60*60*1000
-    }
-    router = route app, _cache
+    app.use (next)->
+        yield next
+        @set 'Cache-Control', 'max-age=' + maxSeconds
 
-    maxSeconds = 3600
-    etag = {}
+    app.use cond()
+
+    app.use etag()
 
     app.use (next)->
-        unless @path is '/auth/google'
-            if !etag[@path]? then etag[@path] = Date.now()
-            reload = @headers.refreshgist?
-            if !reload and cache = _cache.get @path
-                {buff, type, raw_url} = cache
-                @body = buff
-                @type = type
-                @set 'gist_raw_url', raw_url
-            else
-                yield next
-                etag[@path] = Date.now()
+        reload = @headers.refreshgist? or !_cache.has @path
+        if reload then yield next
+        else
+            {buff, type, raw_url} = _cache.get @path
+            @body = buff
+            @type = type
+            @set 'gist_raw_url', raw_url
 
-            @set 'etag', etag[@path]
-            @set 'Cache-Control', 'max-age=' + maxSeconds
-            @set 'Expires', moment().startOf('day').add(1, 'day').format 'ddd, DD MMM YYYY HH:mm:ss [GMT]'
-            @status = 304 if @fresh
-        else yield next
+    app.use route app, _cache
 
-    app.use router
     http.createServer app.callback()
     .listen port, -> console.log "serving gist on #{port}"
