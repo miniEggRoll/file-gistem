@@ -1,5 +1,5 @@
 # Pull base image.
-FROM localhost:5000/nodev0.11.14
+FROM registry.eztable.com/nodev0.11.14
 
 COPY . /tmp
 WORKDIR /tmp
