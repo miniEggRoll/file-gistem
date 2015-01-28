@@ -2,9 +2,10 @@ path            = require 'path'
 https           = require 'https'
 tokenGen        = require 'firebase-token-generator'
 debug           = require('debug')('file:googleAuth')
-{secret, port}  = process.env
 
-tokenGenerator = new tokenGen secret
+{FIREBASE_SECRET}  = process.env
+
+tokenGenerator = new tokenGen FIREBASE_SECRET
 
 getData = (reqOpt)->
     (done)->
@@ -13,8 +14,8 @@ getData = (reqOpt)->
             res.on 'data', (chunk)->
                 result += chunk.toString()
             res.on 'end', ->
-                if res.statusCode is 200 then done null, JSON.parse result 
-                else done new Error(result) 
+                if res.statusCode is 200 then done null, JSON.parse result
+                else done new Error(result)
         do emailReq.end
 
 signFirebaseToken = ({hd, email})->
@@ -23,20 +24,21 @@ signFirebaseToken = ({hd, email})->
     @body = {firebase_token}
 
 module.exports = (next)->
-    token = @get 'googleAccessToken'
-    reqOpt = 
-        hostname: 'www.googleapis.com'
-        path: "/oauth2/v2/userinfo"
-        method: 'GET'
-        headers:
-            Authorization: "Bearer #{token}"
+    if @method is 'GET' and /^\/auth(\/[^\/]*)*$/i.test @path
+        token = @get 'googleAccessToken'
+        reqOpt =
+            hostname: 'www.googleapis.com'
+            path: "/oauth2/v2/userinfo"
+            method: 'GET'
+            headers:
+                Authorization: "Bearer #{token}"
+        try
+            data = yield getData reqOpt
+            {hd, email} = data
+            debug email
+        catch e
+            @throw 401, e.message
 
-    try
-        data = yield getData reqOpt
-        {hd, email} = data
-        console.log data
-    catch e
-        @throw 401, e
-    
-    if hd is 'eztable.com' then signFirebaseToken.call @, {hd, email} else @throw 401, 'NOT EZTABLEr'
+        if hd is 'eztable.com' then signFirebaseToken.call @, {hd, email}
+        else @throw 401, 'NOT EZTABLEr'
     yield next
